@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: sentinel-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentinel-3
+  template:
+    metadata:
+      labels:
+        app: sentinel-3
+    spec:
+      containers:
+        - name: sentinel-3
+          image: sentinel:6.0.6
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "100m"
+          ports:
+            - name: redis-port
+              containerPort: 26379
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-3
+spec:
+  type: ClusterIP
+  selector:
+    app: sentinel-3
+  ports:
+    - name: tcp
+      port: 26379
+      targetPort: 26379

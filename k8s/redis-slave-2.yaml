@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: redis-slave-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-slave-2
+  template:
+    metadata:
+      labels:
+        app: redis-slave-2
+    spec:
+      containers:
+        - name: redis-slave-2
+          image: redis:6.0.6
+          command: 
+            - "redis-server"
+            - "--slaveof"
+            - "redis-master"
+            - "6379"
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "100m"
+          ports:
+            - name: redis-port
+              containerPort: 6379
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave-2
+spec:
+  type: ClusterIP
+  selector:
+    app: redis-slave-2
+  ports:
+    - name: tcp
+      port: 6379
+      targetPort: 6379

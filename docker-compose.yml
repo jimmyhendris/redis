@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  master:
+    image: redis:6.0.6
+  slave_1:
+    image: redis:6.0.6
+    command: redis-server --slaveof redis-master 6379
+    links:
+      - master:redis-master
+  slave_2:
+    image: redis:6.0.6
+    command: 
+      - "redis-server"
+      - "--slaveof"
+      - "redis-master"
+      - "6379"
+    links:
+      - master:redis-master      
+  sentinel_1:
+    build: sentinel
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    links:
+      - master:redis-master
+      - slave_1
+      - slave_2
+  sentinel_2:
+    build: sentinel
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    links:
+      - master:redis-master
+      - slave_1
+      - slave_2
+  sentinel_3:
+    build: sentinel
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    links:
+      - master:redis-master
+      - slave_1
+      - slave_2
